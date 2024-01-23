@@ -36,20 +36,32 @@ pub fn dump_matrix(matrix: Matrix) {
 pub struct League {
     pub name: String,
     pub team_index_range: (usize, usize),
-    pub next_index: usize,
 }
 
 impl League {
     fn num_teams(&self) -> usize {
         return self.team_index_range.1 - self.team_index_range.0;
     }
+}
 
-    fn bump_next_index(&mut self) {
-        self.next_index += 1;
-        if self.next_index >= self.team_index_range.1 {
-            self.next_index = self.team_index_range.0;
+pub fn dump_travel_scores(state: &State, league_distance_matrix: &Matrix) {
+    let mut total_travel_score = 0;
+
+    println!("Travel scores:");
+    for (ti0, team) in state.teams.iter().enumerate() {
+        let li0 = state.teams[ti0].league_index;
+
+        let mut team_travel_score = 0;
+        for ti1 in team.teams_against.iter() {
+            let li1 = state.teams[*ti1].league_index;
+            team_travel_score += get_matrix_val(league_distance_matrix, li0, li1);
         }
+        let league_name = &state.leagues[li0].name;
+        let team_num = ti0 - state.leagues[li0].team_index_range.0;
+        println!(" - {}{}: {}", league_name, team_num, team_travel_score);
+        total_travel_score += team_travel_score;
     }
+    println!("Total travel score: {}", total_travel_score);
 }
 
 pub struct Team {
@@ -66,11 +78,7 @@ pub struct State {
 impl fmt::Debug for State {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         for league in self.leagues.iter() {
-            write!(
-                formatter,
-                "{}, next index: {}\n",
-                league.name, league.next_index
-            )?;
+            write!(formatter, "{}\n", league.name)?;
             for (i, ti) in (league.team_index_range.0..league.team_index_range.1).enumerate() {
                 let team = &self.teams[ti];
                 write!(
@@ -130,6 +138,9 @@ pub fn assign_minimum_interleague_games(
     league_distance_matrix: &Matrix,
     max_games: i32,
 ) {
+    let mut leagues_next_index: Vec<usize> =
+        state.leagues.iter().map(|l| l.team_index_range.0).collect();
+
     struct LeagueDistanceCombo {
         li0: usize,
         li1: usize,
@@ -151,67 +162,72 @@ pub fn assign_minimum_interleague_games(
             state.leagues[comb.li1].num_teams(),
         );
         for _ in 0..num_games {
-            let ti0 = state.leagues[comb.li0].next_index;
-            let ti1 = state.leagues[comb.li1].next_index;
+            let ti0 = leagues_next_index[comb.li0];
+            let ti1 = leagues_next_index[comb.li1];
 
             if state.teams[ti0].num_games == max_games || state.teams[ti1].num_games == max_games {
                 // One of the leagues is full. Stop.
                 break;
             }
             add_game(&mut state.teams, teams_matrix, ti0, ti1);
-            state.leagues[comb.li0].bump_next_index();
-            state.leagues[comb.li1].bump_next_index();
+            leagues_next_index[comb.li0] += 1;
+            if leagues_next_index[comb.li0] >= state.leagues[comb.li0].team_index_range.1 {
+                leagues_next_index[comb.li0] = state.leagues[comb.li0].team_index_range.0;
+            }
+            leagues_next_index[comb.li1] += 1;
+            if leagues_next_index[comb.li1] >= state.leagues[comb.li1].team_index_range.1 {
+                leagues_next_index[comb.li1] = state.leagues[comb.li1].team_index_range.0;
+            }
         }
     }
 }
 
-struct TeamCompareThing {
+struct GameCompare {
+    // Needed for adding the game afterwards.
+    ti0: usize,
     ti1: usize,
-    li1: usize,
-    distance: i32,
+
+    // Compare by these fields, in order
     num_games_against: i32,
-    total_games: i32,
+    distance: i32,
+    max_total_games: i32,
+    min_total_games: i32,
+    total_distance_traveled: i32,
 }
 
-impl PartialEq for TeamCompareThing {
+impl PartialEq for GameCompare {
     fn eq(&self, other: &Self) -> bool {
-        return self.distance == other.distance
-            && self.num_games_against == other.num_games_against
-            && self.total_games == other.total_games;
+        return self.num_games_against == other.num_games_against
+            && self.distance == other.distance
+            && self.max_total_games == other.max_total_games
+            && self.min_total_games == other.min_total_games
+            && self.total_distance_traveled == other.total_distance_traveled;
     }
 }
 
-impl PartialOrd for TeamCompareThing {
+impl PartialOrd for GameCompare {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        return Some(
+        Some(
             self.num_games_against
                 .cmp(&other.num_games_against)
                 .reverse()
                 .then(
-                    self.distance
-                        .cmp(&other.distance)
-                        .reverse()
-                        .then(self.total_games.cmp(&other.total_games).reverse()),
+                    self.distance.cmp(&other.distance).reverse().then(
+                        self.max_total_games
+                            .cmp(&other.max_total_games)
+                            .reverse()
+                            .then(
+                                self.min_total_games
+                                    .cmp(&other.min_total_games)
+                                    .reverse()
+                                    .then(
+                                        self.total_distance_traveled
+                                            .cmp(&other.total_distance_traveled),
+                                    ),
+                            ),
+                    ),
                 ),
-        );
-    }
-}
-
-fn get_team_compare_thing(
-    ti0: usize,
-    ti1: usize,
-    t1_total_games: i32,
-    li0: usize,
-    li1: usize,
-    teams_matrix: &Matrix,
-    league_distance_matrix: &Matrix,
-) -> TeamCompareThing {
-    TeamCompareThing {
-        ti1: ti1,
-        li1: li1,
-        distance: get_matrix_val(league_distance_matrix, li0, li1),
-        num_games_against: get_matrix_val(teams_matrix, ti0, ti1),
-        total_games: t1_total_games,
+        )
     }
 }
 
@@ -221,53 +237,41 @@ pub fn assign_remaining_games(
     league_distance_matrix: &Matrix,
     max_games: i32,
 ) {
-    for li0 in 0..state.leagues.len() {
-        let mut num_teams_remaining = state.leagues[li0].num_teams();
-        while num_teams_remaining > 0 {
-            let ti0 = state.leagues[li0].next_index;
-            if state.teams[ti0].num_games >= max_games {
-                num_teams_remaining -= 1;
-                state.leagues[li0].bump_next_index();
+    loop {
+        let mut gco: Option<GameCompare> = None;
+        for (ti0, team0) in state.teams.iter().enumerate() {
+            if team0.num_games == max_games {
                 continue;
             }
-            let mut tct: Option<TeamCompareThing> = None;
-            for (ti1, team) in state.teams.iter().enumerate() {
-                if ti0 == ti1 {
+            for ti1 in ti0 + 1..state.teams.len() {
+                let team1 = &state.teams[ti1];
+                if team1.num_games == max_games {
                     continue;
                 }
-                if team.num_games >= max_games {
-                    continue;
-                }
-                // println!(
-                //     "assign remaining games, state.leagues[li0] {}, ti0 {}, ti1 {}, teams remaining: {}",
-                //     league.name, ti0, ti1, num_teams_remaining
-                // );
-                let li1 = state.teams[ti1].league_index;
-                let tct2 = Some(get_team_compare_thing(
+                let gco_candidate = Some(GameCompare {
                     ti0,
-                    ti1,
-                    team.num_games,
-                    li0,
-                    li1,
-                    teams_matrix,
-                    league_distance_matrix,
-                ));
-                if tct < tct2 {
-                    tct = tct2;
+                    ti1: ti1,
+                    max_total_games: cmp::max(team0.num_games, team1.num_games),
+                    min_total_games: cmp::min(team0.num_games, team1.num_games),
+                    num_games_against: get_matrix_val(teams_matrix, ti0, ti1),
+                    distance: get_matrix_val(
+                        league_distance_matrix,
+                        team0.league_index,
+                        team1.league_index,
+                    ),
+                    total_distance_traveled: 0,
+                });
+
+                if gco_candidate > gco {
+                    gco = gco_candidate;
                 }
-            }
-            let team1_comp_thing = tct.unwrap_or_else(|| {
-                panic!(
-                    "error finding game for league {}, ti0 {}",
-                    state.leagues[li0].name, ti0,
-                )
-            });
-            add_game(&mut state.teams, teams_matrix, ti0, team1_comp_thing.ti1);
-            state.leagues[li0].bump_next_index();
-            if li0 != team1_comp_thing.li1 {
-                state.leagues[team1_comp_thing.li1].bump_next_index();
             }
         }
+        if gco.is_none() {
+            break;
+        }
+        let gc = gco.unwrap();
+        add_game(&mut state.teams, teams_matrix, gc.ti0, gc.ti1);
     }
 }
 

@@ -39,42 +39,34 @@ pub fn get_2023_majors_softball_state() -> State {
             League {
                 name: "NE".to_string(),
                 team_index_range: (0, 3),
-                next_index: 0,
             },
             League {
                 name: "SL".to_string(),
                 team_index_range: (3, 4),
-                next_index: 3,
             },
             League {
                 name: "MAG".to_string(),
                 team_index_range: (4, 6),
-                next_index: 4,
             },
             League {
                 name: "QA".to_string(),
                 team_index_range: (6, 7),
-                next_index: 6,
             },
             League {
                 name: "NW".to_string(),
                 team_index_range: (7, 8),
-                next_index: 7,
             },
             League {
                 name: "RUG".to_string(),
                 team_index_range: (8, 9),
-                next_index: 8,
             },
             League {
                 name: "BAL".to_string(),
                 team_index_range: (9, 11),
-                next_index: 9,
             },
             League {
                 name: "NC".to_string(),
                 team_index_range: (11, 13),
-                next_index: 11,
             },
         ],
         teams: vec![

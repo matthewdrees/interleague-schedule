@@ -23,4 +23,5 @@ fn main() {
     let team_matrix = get_teams_to_play_against(&mut state, &league_distance_matrix, 16);
     dump_matrix(team_matrix);
     println!("{:?}", state);
+    dump_travel_scores(&state, &league_distance_matrix);
 }
