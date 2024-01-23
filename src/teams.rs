@@ -199,19 +199,19 @@ struct GameCompare {
 
     // Compare by these fields, in order
     num_games_against: i32,
-    distance: i32,
     max_total_games: i32,
     min_total_games: i32,
     total_distance_traveled: i32,
+    distance: i32,
 }
 
 impl PartialEq for GameCompare {
     fn eq(&self, other: &Self) -> bool {
         return self.num_games_against == other.num_games_against
-            && self.distance == other.distance
             && self.max_total_games == other.max_total_games
             && self.min_total_games == other.min_total_games
-            && self.total_distance_traveled == other.total_distance_traveled;
+            && self.total_distance_traveled == other.total_distance_traveled
+            && self.distance == other.distance;
     }
 }
 

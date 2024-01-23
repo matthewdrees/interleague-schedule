@@ -33,122 +33,57 @@ pub fn get_district8_city_league_distances() -> Matrix {
     return league_distance_matrix;
 }
 
-pub fn get_2023_majors_softball_state() -> State {
-    let state: State = State {
-        leagues: vec![
-            League {
-                name: "NE".to_string(),
-                team_index_range: (0, 3),
-            },
-            League {
-                name: "SL".to_string(),
-                team_index_range: (3, 4),
-            },
-            League {
-                name: "MAG".to_string(),
-                team_index_range: (4, 6),
-            },
-            League {
-                name: "QA".to_string(),
-                team_index_range: (6, 7),
-            },
-            League {
-                name: "NW".to_string(),
-                team_index_range: (7, 8),
-            },
-            League {
-                name: "RUG".to_string(),
-                team_index_range: (8, 9),
-            },
-            League {
-                name: "BAL".to_string(),
-                team_index_range: (9, 11),
-            },
-            League {
-                name: "NC".to_string(),
-                team_index_range: (11, 13),
-            },
-        ],
-        teams: vec![
-            Team {
-                league_index: 0,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 0,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 0,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 1,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 2,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 2,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 3,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 4,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 5,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 6,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 6,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 7,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-            Team {
-                league_index: 7,
-                num_games: 0,
-                teams_against: vec![],
-                total_distance: 0,
-            },
-        ],
+pub fn get_state_from_league_info(league_info: &Vec<(String, usize)>) -> State {
+    let mut state = State {
+        leagues: vec![],
+        teams: vec![],
     };
+    let mut last_index: usize = 0;
+    for (li, info) in league_info.iter().enumerate() {
+        let name: String = info.0.clone();
+        let team_count: usize = info.1;
+        state.leagues.push(League {
+            name: name,
+            team_index_range: (last_index, last_index + team_count),
+        });
+        for _ in 0..team_count {
+            state.teams.push(Team {
+                league_index: li,
+                num_games: 0,
+                teams_against: vec![],
+                total_distance: 0,
+            });
+        }
+        last_index += team_count;
+    }
+
     return state;
+}
+
+pub fn get_2023_majors_softball_state() -> State {
+    let league_info: Vec<(String, usize)> = vec![
+        ("NE".to_string(), 3),
+        ("SL".to_string(), 1),
+        ("MAG".to_string(), 2),
+        ("QA".to_string(), 1),
+        ("NW".to_string(), 1),
+        ("RUG".to_string(), 1),
+        ("BAL".to_string(), 2),
+        ("NC".to_string(), 2),
+    ];
+    get_state_from_league_info(&league_info)
+}
+
+pub fn get_2023_aaa_softball_state() -> State {
+    let league_info: Vec<(String, usize)> = vec![
+        ("NE".to_string(), 4),
+        ("SL".to_string(), 3),
+        ("MAG".to_string(), 4),
+        ("QA".to_string(), 2),
+        ("NW".to_string(), 1),
+        ("RUG".to_string(), 3),
+        ("BAL".to_string(), 2),
+        ("NC".to_string(), 4),
+    ];
+    get_state_from_league_info(&league_info)
 }
