@@ -51,7 +51,6 @@ pub fn get_state_from_league_info(league_info: &Vec<(String, usize)>) -> State {
                 league_index: li,
                 num_games: 0,
                 teams_against: vec![],
-                total_distance: 0,
             });
         }
         last_index += team_count;
@@ -62,8 +61,8 @@ pub fn get_state_from_league_info(league_info: &Vec<(String, usize)>) -> State {
 
 pub fn get_2023_majors_softball_state() -> State {
     let league_info: Vec<(String, usize)> = vec![
-        ("NE".to_string(), 3),
         ("SL".to_string(), 1),
+        ("NE".to_string(), 3),
         ("MAG".to_string(), 2),
         ("QA".to_string(), 1),
         ("NW".to_string(), 1),
@@ -76,8 +75,8 @@ pub fn get_2023_majors_softball_state() -> State {
 
 pub fn get_2023_aaa_softball_state() -> State {
     let league_info: Vec<(String, usize)> = vec![
-        ("NE".to_string(), 4),
         ("SL".to_string(), 3),
+        ("NE".to_string(), 4),
         ("MAG".to_string(), 4),
         ("QA".to_string(), 2),
         ("NW".to_string(), 1),

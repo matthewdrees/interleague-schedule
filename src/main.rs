@@ -18,7 +18,7 @@ pub mod interleague_schedule;
 // }
 
 fn main() {
-    let mut state = get_2023_majors_softball_state();
+    let mut state = get_2023_aaa_softball_state();
     let league_distance_matrix = get_district8_city_league_distances();
     let team_matrix = get_teams_to_play_against(&mut state, &league_distance_matrix, 16);
     dump_matrix(team_matrix);

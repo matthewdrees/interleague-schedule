@@ -68,7 +68,6 @@ pub struct Team {
     pub league_index: usize,
     pub num_games: i32,
     pub teams_against: Vec<usize>,
-    pub total_distance: i32,
 }
 
 pub struct State {
@@ -105,20 +104,12 @@ impl fmt::Debug for State {
     }
 }
 
-pub fn add_game(
-    teams: &mut Vec<Team>,
-    teams_matrix: &mut Matrix,
-    ti0: usize,
-    ti1: usize,
-    distance: i32,
-) {
+pub fn add_game(teams: &mut Vec<Team>, teams_matrix: &mut Matrix, ti0: usize, ti1: usize) {
     teams[ti0].num_games += 1;
     teams[ti0].teams_against.push(ti1);
-    teams[ti0].total_distance += distance;
 
     teams[ti1].num_games += 1;
     teams[ti1].teams_against.push(ti0);
-    teams[ti1].total_distance += distance;
 
     increment_matrix(teams_matrix, ti0, ti1);
 }
@@ -134,8 +125,8 @@ pub fn assign_in_league_games(state: &mut State, teams_matrix: &mut Matrix, max_
             .combinations(2)
         {
             // Teams play other in-league teams twice.
-            add_game(&mut state.teams, teams_matrix, combo[0], combo[1], 0);
-            add_game(&mut state.teams, teams_matrix, combo[0], combo[1], 0);
+            add_game(&mut state.teams, teams_matrix, combo[0], combo[1]);
+            add_game(&mut state.teams, teams_matrix, combo[0], combo[1]);
         }
     }
 }
@@ -170,7 +161,6 @@ pub fn assign_minimum_interleague_games(
             state.leagues[comb.li0].num_teams(),
             state.leagues[comb.li1].num_teams(),
         );
-        let distance = get_matrix_val(league_distance_matrix, comb.li0, comb.li1);
         for _ in 0..num_games {
             let ti0 = leagues_next_index[comb.li0];
             let ti1 = leagues_next_index[comb.li1];
@@ -179,7 +169,7 @@ pub fn assign_minimum_interleague_games(
                 // One of the leagues is full. Stop.
                 break;
             }
-            add_game(&mut state.teams, teams_matrix, ti0, ti1, distance);
+            add_game(&mut state.teams, teams_matrix, ti0, ti1);
             leagues_next_index[comb.li0] += 1;
             if leagues_next_index[comb.li0] >= state.leagues[comb.li0].team_index_range.1 {
                 leagues_next_index[comb.li0] = state.leagues[comb.li0].team_index_range.0;
@@ -199,18 +189,18 @@ struct GameCompare {
 
     // Compare by these fields, in order
     num_games_against: i32,
+    num_league_games_against: i32,
     max_total_games: i32,
     min_total_games: i32,
-    total_distance_traveled: i32,
     distance: i32,
 }
 
 impl PartialEq for GameCompare {
     fn eq(&self, other: &Self) -> bool {
         return self.num_games_against == other.num_games_against
+            && self.num_league_games_against == other.num_league_games_against
             && self.max_total_games == other.max_total_games
             && self.min_total_games == other.min_total_games
-            && self.total_distance_traveled == other.total_distance_traveled
             && self.distance == other.distance;
     }
 }
@@ -222,16 +212,17 @@ impl PartialOrd for GameCompare {
                 .cmp(&other.num_games_against)
                 .reverse()
                 .then(
-                    self.max_total_games
-                        .cmp(&other.max_total_games)
+                    self.num_league_games_against
+                        .cmp(&other.num_league_games_against)
                         .reverse()
                         .then(
-                            self.min_total_games
-                                .cmp(&other.min_total_games)
+                            self.max_total_games
+                                .cmp(&other.max_total_games)
                                 .reverse()
                                 .then(
-                                    self.total_distance_traveled
-                                        .cmp(&other.total_distance_traveled)
+                                    self.min_total_games
+                                        .cmp(&other.min_total_games)
+                                        .reverse()
                                         .then(self.distance.cmp(&other.distance).reverse()),
                                 ),
                         ),
@@ -263,12 +254,12 @@ pub fn assign_remaining_games(
                     max_total_games: cmp::max(team0.num_games, team1.num_games),
                     min_total_games: cmp::min(team0.num_games, team1.num_games),
                     num_games_against: get_matrix_val(teams_matrix, ti0, ti1),
+                    num_league_games_against: 0,
                     distance: get_matrix_val(
                         league_distance_matrix,
                         team0.league_index,
                         team1.league_index,
                     ),
-                    total_distance_traveled: cmp::max(team0.total_distance, team1.total_distance),
                 });
 
                 if gco_candidate > gco {
@@ -280,7 +271,7 @@ pub fn assign_remaining_games(
             break;
         }
         let gc = gco.unwrap();
-        add_game(&mut state.teams, teams_matrix, gc.ti0, gc.ti1, gc.distance);
+        add_game(&mut state.teams, teams_matrix, gc.ti0, gc.ti1);
     }
 }
 
