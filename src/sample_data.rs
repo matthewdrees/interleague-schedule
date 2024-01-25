@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+
+use crate::interleague_schedule::*;
 use crate::teams::*;
 
 pub fn get_district8_city_league_distances() -> Matrix {
@@ -85,4 +88,40 @@ pub fn get_2023_aaa_softball_state() -> State {
         ("NC".to_string(), 4),
     ];
     get_state_from_league_info(&league_info)
+}
+
+fn get_day_from_day_info(day_info: (String, bool, Vec<usize>), num_teams: usize) -> Day {
+    let not_these_teams = HashSet::from_iter(day_info.2);
+    Day {
+        date: day_info.0,
+        is_weekend: day_info.1,
+        teams_playing: &HashSet::from_iter(0..num_teams) - &not_these_teams,
+        games: vec![],
+    }
+}
+
+pub fn get_2023_majors_softball_days(num_teams: usize) -> Vec<Day> {
+    vec![
+        ("3/23".to_string(), true, vec![12]),
+        ("3/27".to_string(), false, vec![10]),
+        ("3/30".to_string(), true, vec![11]),
+        ("4/03".to_string(), false, vec![9]),
+        ("4/13".to_string(), true, vec![1, 2, 3, 4, 5, 7, 10, 11, 12]),
+        ("4/17".to_string(), false, vec![8]),
+        ("4/20".to_string(), true, vec![0]),
+        ("4/24".to_string(), false, vec![0]),
+        ("4/27".to_string(), true, vec![9]),
+        ("4/29".to_string(), false, vec![6]),
+        ("5/01".to_string(), false, vec![5]),
+        ("5/04".to_string(), true, vec![8]),
+        ("5/06".to_string(), false, vec![4]),
+        ("5/08".to_string(), false, vec![3]),
+        ("5/11".to_string(), true, vec![7]),
+        ("5/13".to_string(), false, vec![3]),
+        ("5/15".to_string(), false, vec![1]),
+        ("5/18".to_string(), true, vec![6]),
+    ]
+    .into_iter()
+    .map(|di| return get_day_from_day_info(di, num_teams))
+    .collect()
 }
