@@ -24,6 +24,7 @@ fn main() {
     remaining_games.sort_by_key(|g| g.distance);
 
     let days = get_2023_majors_softball_days(state.teams.len());
+    // days.sort_by_key(|k| k.teams_playing.len());
 
     let schedule_config = ScheduleConfig {
         days,
@@ -32,13 +33,13 @@ fn main() {
     };
     println!("{:?}", schedule_config);
 
-    // println!(
-    //     "{}",
-    //     match backtrack::solve(config) {
-    //         Some(solution) => format!("{:?}", solution),
-    //         None => "No solution found".to_string(),
-    //     }
-    // );
+    println!(
+        "{}",
+        match backtrack::solve(schedule_config) {
+            Some(solution) => format!("{:?}", solution),
+            None => "No solution found".to_string(),
+        }
+    );
 }
 
 // fn main() {

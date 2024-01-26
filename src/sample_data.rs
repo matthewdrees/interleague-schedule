@@ -117,7 +117,7 @@ pub fn get_2023_majors_softball_days(num_teams: usize) -> Vec<Day> {
         ("5/06".to_string(), false, vec![4]),
         ("5/08".to_string(), false, vec![3]),
         ("5/11".to_string(), true, vec![7]),
-        ("5/13".to_string(), false, vec![3]),
+        ("5/13".to_string(), false, vec![2]),
         ("5/15".to_string(), false, vec![1]),
         ("5/18".to_string(), true, vec![6]),
     ]
