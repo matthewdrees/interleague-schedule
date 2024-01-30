@@ -86,6 +86,9 @@ impl Config for ScheduleConfig {
                     .remove(&next_game.ti1);
                 new_days[self.days_index].games.push(next_game);
 
+                if new_remaining_games.len() < new_days[self.days_index].teams_playing.len() / 2 {
+                    break;
+                }
                 successors.push(ScheduleConfig {
                     days: new_days,
                     days_index: self.days_index,
