@@ -95,7 +95,7 @@ fn get_day_from_day_info(day_info: (String, bool, Vec<usize>), num_teams: usize)
     Day {
         date: day_info.0,
         is_weekend: day_info.1,
-        teams_playing: &HashSet::from_iter(0..num_teams) - &not_these_teams,
+        teams_remaining: &HashSet::from_iter(0..num_teams) - &not_these_teams,
         games: vec![],
     }
 }
