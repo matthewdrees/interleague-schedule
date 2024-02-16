@@ -1,5 +1,5 @@
 use backtrack::Config;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 #[derive(Copy, Clone, Debug)]
@@ -24,8 +24,21 @@ pub struct ScheduleConfig {
     pub remaining_games: Vec<Game>,
 }
 
+fn validate_days(days: &Vec<Day>) -> bool {
+    // Verify same number of games for all teams.
+    let mut hm: HashMap<usize, i32> = HashMap::new();
+    for d in days.iter() {
+        for u in d.teams_playing.iter() {
+            *hm.entry(*u).or_insert(0) += 1;
+        }
+    }
+    let val = hm.get(&0).unwrap();
+    return hm.values().all(|game_count| game_count == val);
+}
+
 impl ScheduleConfig {
     pub fn new(days: Vec<Day>, remaining_games: Vec<Game>) -> ScheduleConfig {
+        assert!(validate_days(&days), "bad days");
         ScheduleConfig {
             days,
             days_index: 0,
@@ -103,7 +116,8 @@ impl Config for ScheduleConfig {
         true
     }
     fn is_goal(&self) -> bool {
-        self.days_index == self.days.len()
+        // self.days_index == self.days.len()
+        self.days_index == 15
     }
 }
 

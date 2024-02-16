@@ -90,12 +90,27 @@ pub fn get_2023_aaa_softball_state() -> State {
     get_state_from_league_info(&league_info)
 }
 
+pub fn get_2024_aaa_softball_state() -> State {
+    let league_info: Vec<(String, usize)> = vec![
+        ("SL".to_string(), 4),
+        ("NE".to_string(), 4),
+        ("MAG".to_string(), 5),
+        ("QA".to_string(), 2),
+        ("NW".to_string(), 1),
+        ("RUG".to_string(), 3),
+        ("BAL".to_string(), 1),
+        ("NC".to_string(), 3),
+    ];
+    get_state_from_league_info(&league_info)
+}
 fn get_day_from_day_info(day_info: (String, bool, Vec<usize>), num_teams: usize) -> Day {
     let not_these_teams = HashSet::from_iter(day_info.2);
+    let teams_playing = &HashSet::from_iter(0..num_teams) - &not_these_teams;
+    assert!(teams_playing.len() % 2 == 0);
     Day {
         date: day_info.0,
         is_weekend: day_info.1,
-        teams_playing: &HashSet::from_iter(0..num_teams) - &not_these_teams,
+        teams_playing: teams_playing,
         games: vec![],
     }
 }
@@ -128,24 +143,32 @@ pub fn get_2023_majors_softball_days(num_teams: usize) -> Vec<Day> {
 
 pub fn get_2023_aaa_softball_days(num_teams: usize) -> Vec<Day> {
     vec![
-        ("3/23".to_string(), true, vec![12]),
-        ("3/27".to_string(), false, vec![10]),
-        ("3/30".to_string(), true, vec![11]),
-        ("4/03".to_string(), false, vec![9]),
-        ("4/13".to_string(), true, vec![1, 2, 3, 4, 5, 7, 10, 11, 12]),
-        ("4/17".to_string(), false, vec![8]),
-        ("4/20".to_string(), true, vec![0]),
-        ("4/24".to_string(), false, vec![0]),
-        ("4/27".to_string(), true, vec![9]),
+        ("3/23".to_string(), true, vec![22]),
+        ("3/27".to_string(), false, vec![3]),
+        ("3/30".to_string(), true, vec![21]),
+        ("4/03".to_string(), false, vec![4]),
+        (
+            "4/13".to_string(),
+            true,
+            vec![
+                4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+            ],
+        ),
+        ("4/17".to_string(), false, vec![5]),
+        ("4/20".to_string(), true, vec![0, 1, 2]),
+        ("4/24".to_string(), false, vec![0, 1, 2]),
+        ("4/27".to_string(), true, vec![19]),
         ("4/29".to_string(), false, vec![6]),
-        ("5/01".to_string(), false, vec![5]),
-        ("5/04".to_string(), true, vec![8]),
-        ("5/06".to_string(), false, vec![4]),
-        ("5/08".to_string(), false, vec![3]),
-        ("5/11".to_string(), true, vec![7]),
-        ("5/13".to_string(), false, vec![2]),
-        ("5/15".to_string(), false, vec![1]),
-        ("5/18".to_string(), true, vec![6]),
+        ("5/04".to_string(), true, vec![18]),
+        ("5/06".to_string(), false, vec![8]),
+        (
+            "5/08".to_string(),
+            false,
+            vec![3, 7, 9, 10, 11, 12, 13, 14, 15],
+        ),
+        ("5/11".to_string(), true, vec![17]),
+        ("5/13".to_string(), false, vec![10]),
+        ("5/18".to_string(), true, vec![16]),
     ]
     .into_iter()
     .map(|di| return get_day_from_day_info(di, num_teams))
