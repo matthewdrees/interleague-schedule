@@ -174,3 +174,26 @@ pub fn get_2023_aaa_softball_days(num_teams: usize) -> Vec<Day> {
     .map(|di| return get_day_from_day_info(di, num_teams))
     .collect()
 }
+
+pub fn get_2024_aaa_softball_days(num_teams: usize) -> Vec<Day> {
+    vec![
+        ("3/23".to_string(), true, vec![]),
+        ("3/26".to_string(), false, vec![]),
+        ("3/30".to_string(), true, vec![]),
+        ("4/02".to_string(), false, vec![]),
+        ("4/16".to_string(), false, vec![]),
+        ("4/20".to_string(), true, vec![]),
+        ("4/23".to_string(), false, vec![]),
+        ("4/27".to_string(), true, vec![]),
+        ("4/30".to_string(), false, vec![]),
+        ("5/04".to_string(), true, vec![]),
+        ("5/07".to_string(), false, vec![]),
+        ("5/11".to_string(), true, vec![]),
+        ("5/14".to_string(), false, vec![]),
+        ("5/18".to_string(), true, vec![]),
+        ("5/21".to_string(), false, vec![]),
+    ]
+    .into_iter()
+    .map(|di| return get_day_from_day_info(di, num_teams))
+    .collect()
+}
